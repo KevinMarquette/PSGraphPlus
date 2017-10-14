@@ -1,0 +1,9 @@
+site_name: PSGraphPlus
+repo_url: https://github.com/KevinMarquette/PSGraphPlus
+theme: readthedocs
+pages:
+  - Home: index.md
+  - PSGraphPlus Basics:
+    - What is PSGraphPlus: about.md
+    - Quick Start: Quick-Start-Installation-and-Example.md
+  - Acknowledgements: acknowledgements.md
