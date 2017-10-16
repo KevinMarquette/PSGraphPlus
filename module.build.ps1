@@ -1,3 +1,4 @@
+#requires -Modules InvokeBuild, PSDeploy, BuildHelpers, PSScriptAnalyzer, PSGraph, PlatyPS, Pester
 $script:ModuleName = 'PSGraphPlus'
 
 $script:Source = Join-Path $BuildRoot $ModuleName
