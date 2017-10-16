@@ -51,7 +51,7 @@
     # ProcessorArchitecture = ''
 
     # Modules that must be imported into the global environment prior to importing this module
-    RequiredModules   = @('PSGraph')
+    RequiredModules   = @(@{ModuleName = 'PSGraph'; ModuleVersion = '0.6.1'; })
 
     # Assemblies that must be loaded prior to importing this module
     # RequiredAssemblies = @()
@@ -69,7 +69,7 @@
     # NestedModules = @()
 
     # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
-    FunctionsToExport = @('Show-GitGraph','Show-NetworkConnectionGraph','Show-ProcessConnectionGraph','Show-ServiceDependencyGraph')
+    FunctionsToExport = @('Show-GitGraph', 'Show-NetworkConnectionGraph', 'Show-ProcessConnectionGraph', 'Show-ServiceDependencyGraph')
 
     # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
     CmdletsToExport   = @()
@@ -95,19 +95,21 @@
         PSData = @{
 
             # Tags applied to this module. These help with module discovery in online galleries.
-            # Tags = @()
+            Tags                       = @('graph', 'visualization')
 
             # A URL to the license for this module.
-            # LicenseUri = ''
-
+            LicenseUri                 = 'https://github.com/KevinMarquette/PSGraphPlus/blob/master/LICENSE'
+            
             # A URL to the main website for this project.
-            # ProjectUri = ''
+            ProjectUri                 = 'https://github.com/KevinMarquette/PSGraphPlus'
 
             # A URL to an icon representing this module.
             # IconUri = ''
 
             # ReleaseNotes of this module
             # ReleaseNotes = ''
+            
+            ExternalModuleDependencies = @('PSGraph')
 
         } # End of PSData hashtable
 
