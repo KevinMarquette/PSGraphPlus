@@ -51,7 +51,7 @@
     # ProcessorArchitecture = ''
 
     # Modules that must be imported into the global environment prior to importing this module
-    RequiredModules   = @(@{ModuleName = 'PSGraph'; ModuleVersion = '0.6.1'; })
+    RequiredModules   = @(@{ModuleName = 'PSGraph'})
 
     # Assemblies that must be loaded prior to importing this module
     # RequiredAssemblies = @()
@@ -66,7 +66,7 @@
     # FormatsToProcess = @()
 
     # Modules to import as nested modules of the module specified in RootModule/ModuleToProcess
-    # NestedModules = @()
+    NestedModules     = @('PSGraph')
 
     # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
     FunctionsToExport = @('Show-GitGraph', 'Show-NetworkConnectionGraph', 'Show-ProcessConnectionGraph', 'Show-ServiceDependencyGraph')
@@ -108,7 +108,7 @@
 
             # ReleaseNotes of this module
             # ReleaseNotes = ''
-            
+
             ExternalModuleDependencies = @('PSGraph')
 
         } # End of PSData hashtable
