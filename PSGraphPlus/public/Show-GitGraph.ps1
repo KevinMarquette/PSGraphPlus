@@ -23,14 +23,22 @@ function Show-GitGraph
     Output the raw graph without generating the image or showing it. Useful for testing.
     
     .EXAMPLE
-    Show-GitGraph
+    Show-GitGraph    
     
+    .EXAMPLE
+    Show-GitGraph -HistoryDepth 30
+    
+
+    .EXAMPLE
+    Show-GitGraph -Path c:\workspace\project -ShowCommitMessage
+
     .NOTES
     
     #>
     [CmdletBinding()]
     param(
         $Path = $PWD,
+        [alias('Depth')]
         $HistoryDepth = 15,
         $Uri = 'https://github.com/KevinMarquette/PSGraph',
         [switch]
