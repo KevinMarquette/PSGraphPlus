@@ -29,13 +29,18 @@ function ComplexTask
     Task $Name @Options
 }
 
-Task Default Build, Pester, UpdateSource, Publish
+Task Default Clean, Build, Pester, UpdateSource, Publish
 Task Build CopyToOutput, BuildPSM1, BuildPSD1, PackageHelp
 Task Pester Build, ImportModule, UnitTests, FullTests
+Task Local Build, Pester, UpdateSource
 
 Task Clean {
-    $null = Remove-Item $Output -Recurse -ErrorAction Ignore
-    $null = New-Item  -Type Directory -Path $Destination
+    
+    If (Test-Path $Output)
+    {
+        $null = Remove-Item $Output -Recurse -ErrorAction Ignore
+    }
+    $null = New-Item  -Type Directory -Path $Destination -ErrorAction Ignore
 }
 
 Task UnitTests {
@@ -231,7 +236,7 @@ Task Publish {
 }
 
 ComplexTask CreateHelp @{
-    Inputs  = Get-ChildItem "$ModuleName\Public\*.ps1"
+    Inputs  = {Get-ChildItem "$ModuleName\Public\*.ps1"}
     Outputs = {
         process
         {
@@ -257,7 +262,7 @@ ComplexTask CreateHelp @{
 }
 
 ComplexTask PackageHelp  @{
-    Inputs  = Get-ChildItem $HelpRoot -Recurse -File
+    Inputs  = {Get-ChildItem $HelpRoot -Recurse -File}
     Outputs = "$Destination\en-us\$ModuleName-help.xml"
     Action  = 'CreateHelp', {
         New-ExternalHelp -Path $HelpRoot -OutputPath "$Destination\en-us" -force | % fullname

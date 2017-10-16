@@ -1,5 +1,6 @@
 Show-GitGraph:Path
 Show-GitGraph:HistoryDepth
+Show-GitGraph:Depth
 Show-GitGraph:Uri
 Show-GitGraph:ShowCommitMessage
 Show-GitGraph:Raw
