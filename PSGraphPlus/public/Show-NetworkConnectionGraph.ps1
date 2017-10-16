@@ -38,6 +38,7 @@ function Show-NetworkConnectionGraph
         $session = @{}
         if ( $null -ne $ComputerName -and $Credential )
         {
+            $PSBoundParameters.Remove('Raw')
             $session = @{
                 CimSession = New-CimSession @PSBoundParameters
             }

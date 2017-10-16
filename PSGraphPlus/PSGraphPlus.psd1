@@ -12,7 +12,7 @@
     RootModule        = 'PSGraphPlus.psm1'
 
     # Version number of this module.
-    ModuleVersion     = '0.1.2'
+    ModuleVersion     = '0.1.3'
 
     # Supported PSEditions
     # CompatiblePSEditions = @()
@@ -69,7 +69,7 @@
     # NestedModules = @()
 
     # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
-    FunctionsToExport = @('Show-NetworkConnectionGraph','Show-ProcessConnectionGraph')
+    FunctionsToExport = @('Show-NetworkConnectionGraph','Show-ProcessConnectionGraph','Show-ServiceDependencyGraph')
 
     # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
     CmdletsToExport   = @()

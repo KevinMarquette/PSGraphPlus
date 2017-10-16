@@ -38,14 +38,9 @@ function Show-ProcessConnectionGraph
         $session = @{}
         if ( $null -ne $ComputerName -and $Credential )
         {
+            $PSBoundParameters.Remove('Raw')
             $session = @{
                 CimSession = New-CimSession @PSBoundParameters
-            }
-        }
-        elseif ( $CimSession )
-        {
-            $session = @{
-                CimSession = $CimSession
             }
         }
 
