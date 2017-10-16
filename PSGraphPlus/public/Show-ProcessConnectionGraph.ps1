@@ -1,4 +1,4 @@
-function Show-NetworkConnectionGraph
+function Show-ProcessConnectionGraph
 {
     <#
     .SYNOPSIS
@@ -28,7 +28,7 @@ function Show-NetworkConnectionGraph
         [pscredential]
         $Credential,
 
-        # Outputs the raw dot graph (for testing
+        # Outputs the raw dot graph (for testing)
         [switch]
         $Raw
     )
@@ -53,19 +53,21 @@ function Show-NetworkConnectionGraph
         $netstat = $netstat | Where-Object LocalAddress -NotMatch ':'
         $dns = Get-DnsClientCache @session | Where-Object data -in $netstat.RemoteAddress
         
-        $graph = graph network @{rankdir = 'LR'; label = 'Network Connections'} {
+        $process = Get-CIMInstance -ClassName CIM_Process @session | Where-Object ProcessId -in $netstat.OwningProcess
+
+        $graph = graph network @{rankdir = 'LR'; label = 'Process Network Connections'} {
             Node @{shape = 'rect'}
+            Node $process -NodeScript {$_.ProcessID} @{label = {'{0}\n{1}' -f $_.ProcessName, $_.ProcessID}}
 
             $EdgeParam = @{
                 Node       = $netstat
-                FromScript = {$_.LocalAddress}
+                FromScript = {$_.OwningProcess}
                 ToScript   = {$_.RemoteAddress}
                 Attributes = @{label = {'{0}:{1}' -f $_.LocalPort, $_.RemotePort}}
             }
             Edge @EdgeParam
 
             Node $dns -NodeScript {$_.data} @{label = {'{0}\n{1}' -f $_.entry, $_.data}}
-
         } 
 
         if ($Raw)

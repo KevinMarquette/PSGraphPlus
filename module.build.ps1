@@ -7,9 +7,29 @@ $script:ModulePath = "$Destination\$ModuleName.psm1"
 $script:ManifestPath = "$Destination\$ModuleName.psd1"
 $script:Imports = ( 'private', 'public', 'classes' )
 $script:TestFile = "$PSScriptRoot\output\TestResults_PS$PSVersion`_$TimeStamp.xml"
+$script:HelpRoot = Join-Path $Output 'help'
+
+function ComplexTask
+{
+    [CmdletBinding()]
+    param(
+        [Parameter(Position = 0, Mandatory = 1)]
+        [string]
+        $Name,
+        [Parameter(Position = 1, Mandatory = 1)]
+        [hashtable]
+        $Options
+    )
+    if ( $null -ne $Options.Action)
+    {
+        $Options.Jobs = $Options.Action
+        $Options.Remove('Action')
+    }
+    Task $Name @Options
+}
 
 Task Default Build, Pester, UpdateSource, Publish
-Task Build CopyToOutput, BuildPSM1, BuildPSD1
+Task Build CopyToOutput, BuildPSM1, BuildPSD1, PackageHelp
 Task Pester Build, ImportModule, UnitTests, FullTests
 
 Task Clean {
@@ -58,99 +78,109 @@ Task CopyToOutput {
         ForEach-Object { "  Create [.{0}]" -f $_.fullname.replace($PSScriptRoot, '')}
 }
 
-Task BuildPSM1 -Inputs (Get-Item "$source\*\*.ps1") -Outputs $ModulePath {
-
-    [System.Text.StringBuilder]$stringbuilder = [System.Text.StringBuilder]::new()    
-    foreach ($folder in $imports )
-    {
-        [void]$stringbuilder.AppendLine( "Write-Verbose 'Importing from [$Source\$folder]'" )
-        if (Test-Path "$source\$folder")
+ComplexTask BuildPSM1 @{
+    Inputs  = (Get-Item "$source\*\*.ps1") 
+    Outputs = $ModulePath 
+    Action  = {
+        [System.Text.StringBuilder]$stringbuilder = [System.Text.StringBuilder]::new()    
+        foreach ($folder in $imports )
         {
-            $fileList = Get-ChildItem "$source\$folder\*.ps1" | Where Name -NotLike '*.Tests.ps1'
-            foreach ($file in $fileList)
+            [void]$stringbuilder.AppendLine( "Write-Verbose 'Importing from [$Source\$folder]'" )
+            if (Test-Path "$source\$folder")
             {
-                $shortName = $file.fullname.replace($PSScriptRoot, '')
-                Write-Output "  Importing [.$shortName]"
-                [void]$stringbuilder.AppendLine( "# .$shortName" ) 
-                [void]$stringbuilder.AppendLine( [System.IO.File]::ReadAllText($file.fullname) )
+                $fileList = Get-ChildItem "$source\$folder\*.ps1" | Where Name -NotLike '*.Tests.ps1'
+                foreach ($file in $fileList)
+                {
+                    $shortName = $file.fullname.replace($PSScriptRoot, '')
+                    Write-Output "  Importing [.$shortName]"
+                    [void]$stringbuilder.AppendLine( "# .$shortName" ) 
+                    [void]$stringbuilder.AppendLine( [System.IO.File]::ReadAllText($file.fullname) )
+                }
             }
         }
+        
+        Write-Output "  Creating module [$ModulePath]"
+        Set-Content -Path  $ModulePath -Value $stringbuilder.ToString() 
     }
-    
-    Write-Output "  Creating module [$ModulePath]"
-    Set-Content -Path  $ModulePath -Value $stringbuilder.ToString() 
 }
 
-Task NextPSGalleryVersion -if (-Not ( Test-Path "$output\version.xml" ) ) -Before BuildPSD1 {
-    $galleryVersion = Get-NextPSGalleryVersion -Name $ModuleName
-    $galleryVersion | Export-Clixml -Path "$output\version.xml"
+ComplexTask NextPSGalleryVersion @{
+    If     = (-Not ( Test-Path "$output\version.xml" ) ) 
+    Before = 'BuildPSD1'
+    Action = {
+        $galleryVersion = Get-NextPSGalleryVersion -Name $ModuleName
+        $galleryVersion | Export-Clixml -Path "$output\version.xml"
+    }
 }
 
-Task BuildPSD1 -inputs (Get-ChildItem $Source -Recurse -File) -Outputs $ManifestPath {
-   
-    Write-Output "  Update [$ManifestPath]"
-    Copy-Item "$source\$ModuleName.psd1" -Destination $ManifestPath
-
-
-    $functions = Get-ChildItem "$ModuleName\Public\*.ps1" | Where-Object { $_.name -notmatch 'Tests'} | Select-Object -ExpandProperty basename      
-    Set-ModuleFunctions -Name $ManifestPath -FunctionsToExport $functions
-
-    Write-Output "  Detecting semantic versioning"
-
-    Import-Module ".\$ModuleName"
-    $commandList = Get-Command -Module $ModuleName
-    Remove-Module $ModuleName
-
-    Write-Output "    Calculating fingerprint"
-    $fingerprint = foreach ($command in $commandList )
-    {
-        foreach ($parameter in $command.parameters.keys)
-        {
-            '{0}:{1}' -f $command.name, $command.parameters[$parameter].Name
-            $command.parameters[$parameter].aliases | Foreach-Object { '{0}:{1}' -f $command.name, $_}
-        }
-    }
+ComplexTask BuildPSD1 @{
+    Inputs  = (Get-ChildItem $Source -Recurse -File) 
+    Outputs = $ManifestPath 
+    Action  = {
     
-    if (Test-Path .\fingerprint)
-    {
-        $oldFingerprint = Get-Content .\fingerprint
-    }
-    
-    $bumpVersionType = 'Patch'
-    '    Detecting new features'
-    $fingerprint | Where {$_ -notin $oldFingerprint } | % {$bumpVersionType = 'Minor'; "      $_"}    
-    '    Detecting breaking changes'
-    $oldFingerprint | Where {$_ -notin $fingerprint } | % {$bumpVersionType = 'Major'; "      $_"}
+        Write-Output "  Update [$ManifestPath]"
+        Copy-Item "$source\$ModuleName.psd1" -Destination $ManifestPath
 
-    Set-Content -Path .\fingerprint -Value $fingerprint
 
-    # Bump the module version
-    $version = [version] (Get-Metadata -Path $manifestPath -PropertyName 'ModuleVersion')
+        $functions = Get-ChildItem "$ModuleName\Public\*.ps1" | Where-Object { $_.name -notmatch 'Tests'} | Select-Object -ExpandProperty basename      
+        Set-ModuleFunctions -Name $ManifestPath -FunctionsToExport $functions
 
-    if ( $version -lt ([version]'1.0.0') )
-    {
-        # Still in beta, don't bump major version
-        if ( $bumpVersionType -eq 'Major'  )
+        Write-Output "  Detecting semantic versioning"
+
+        Import-Module ".\$ModuleName"
+        $commandList = Get-Command -Module $ModuleName
+        Remove-Module $ModuleName
+
+        Write-Output "    Calculating fingerprint"
+        $fingerprint = foreach ($command in $commandList )
         {
-            $bumpVersionType = 'Minor'
+            foreach ($parameter in $command.parameters.keys)
+            {
+                '{0}:{1}' -f $command.name, $command.parameters[$parameter].Name
+                $command.parameters[$parameter].aliases | Foreach-Object { '{0}:{1}' -f $command.name, $_}
+            }
         }
-        else 
+        
+        if (Test-Path .\fingerprint)
         {
-            $bumpVersionType = 'Patch'
+            $oldFingerprint = Get-Content .\fingerprint
         }
-       
-    }
+        
+        $bumpVersionType = 'Patch'
+        '    Detecting new features'
+        $fingerprint | Where {$_ -notin $oldFingerprint } | % {$bumpVersionType = 'Minor'; "      $_"}    
+        '    Detecting breaking changes'
+        $oldFingerprint | Where {$_ -notin $fingerprint } | % {$bumpVersionType = 'Major'; "      $_"}
 
-    $galleryVersion = Import-Clixml -Path "$output\version.xml"
-    if ( $version -lt $galleryVersion )
-    {
-        $version = $galleryVersion
+        Set-Content -Path .\fingerprint -Value $fingerprint
+
+        # Bump the module version
+        $version = [version] (Get-Metadata -Path $manifestPath -PropertyName 'ModuleVersion')
+
+        if ( $version -lt ([version]'1.0.0') )
+        {
+            # Still in beta, don't bump major version
+            if ( $bumpVersionType -eq 'Major'  )
+            {
+                $bumpVersionType = 'Minor'
+            }
+            else 
+            {
+                $bumpVersionType = 'Patch'
+            }       
+        }
+
+        $galleryVersion = Import-Clixml -Path "$output\version.xml"
+        if ( $version -lt $galleryVersion )
+        {
+            $version = $galleryVersion
+        }
+        Write-Output "  Stepping [$bumpVersionType] version [$version]"
+        $version = [version] (Step-Version $version -Type $bumpVersionType)
+        Write-Output "  Using version: $version"
+        
+        Update-Metadata -Path $ManifestPath -PropertyName ModuleVersion -Value $version
     }
-    Write-Output "  Stepping [$bumpVersionType] version [$version]"
-    $version = [version] (Step-Version $version -Type $bumpVersionType)
-    Write-Output "  Using version: $version"
-    
-    Update-Metadata -Path $ManifestPath -PropertyName ModuleVersion -Value $version
 }
 
 Task UpdateSource {
@@ -196,5 +226,39 @@ Task Publish {
         "`t* You are in a known build system (Current: $ENV:BHBuildSystem)`n" + 
         "`t* You are committing to the master branch (Current: $ENV:BHBranchName) `n" + 
         "`t* Your commit message includes !deploy (Current: $ENV:BHCommitMessage)"
+    }
+}
+
+ComplexTask CreateHelp @{
+    Inputs  = Get-ChildItem "$ModuleName\Public\*.ps1"
+    Outputs = {
+        process
+        {
+            Get-ChildItem $_ | % {'{0}\{1}.md' -f $HelpRoot, $_.basename}
+        }
+    }
+    Partial = $true
+    Action  = 'ImportModule', {    
+        process
+        {
+            $null = New-Item -Path $HelpRoot -ItemType Directory -ErrorAction SilentlyContinue        
+            $mdHelp = @{
+                #Module                = $script:ModuleName
+                OutputFolder          = $HelpRoot
+                AlphabeticParamsOrder = $true
+                Verbose               = $true
+                Force                 = $true
+                Command               = Get-Item $_ | % basename
+            }
+            New-MarkdownHelp @mdHelp | % fullname
+        }    
+    }
+}
+
+ComplexTask PackageHelp  @{
+    Inputs  = Get-ChildItem $HelpRoot -Recurse -File
+    Outputs = "$Destination\en-us\$ModuleName-help.xml"
+    Action  = 'CreateHelp', {
+        New-ExternalHelp -Path $HelpRoot -OutputPath "$Destination\en-us" -force | % fullname
     }
 }
