@@ -21,12 +21,20 @@ function ComplexTask
         [hashtable]
         $Options
     )
-    if ( $null -ne $Options.Action)
+    try     
     {
-        $Options.Jobs = $Options.Action
-        $Options.Remove('Action')
+        if ( $null -ne $Options.Action )
+        {
+            $Options.Jobs = $Options.Action
+            $Options.Remove('Action')
+        }
+        Task $Name @Options
     }
-    Task $Name @Options
+    catch 
+    {
+        Write-Error "Failed to execute taks [$Name]"
+        throw
+    }    
 }
 
 Task Default Clean, Build, Pester, UpdateSource, Publish
