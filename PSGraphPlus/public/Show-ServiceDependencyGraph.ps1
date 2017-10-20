@@ -37,7 +37,7 @@ function Show-ServiceDependencyGraph
 
     process
     {
-        if ( $null -ne $ComputerName -and $Credential )
+        if ( $null -ne $ComputerName )
         {
             Write-Verbose 'Connecting to remote system'
             $PSBoundParameters.Remove('Raw')

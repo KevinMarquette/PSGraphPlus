@@ -36,7 +36,7 @@ function Show-ProcessConnectionGraph
     process
     {
         $session = @{}
-        if ( $null -ne $ComputerName -and $Credential )
+        if ( $null -ne $ComputerName )
         {
             $PSBoundParameters.Remove('Raw')
             $session = @{
