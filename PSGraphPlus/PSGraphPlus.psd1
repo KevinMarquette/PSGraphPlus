@@ -24,7 +24,7 @@
     Author            = 'Kevin Marquette'
 
     # Company or vendor of this module
-    CompanyName       = 'Unknown'
+    CompanyName       = 'Self'
 
     # Copyright statement for this module
     Copyright         = '(c) 2017 Kevin Marquette. All rights reserved.'
@@ -95,13 +95,13 @@
         PSData = @{
 
             # Tags applied to this module. These help with module discovery in online galleries.
-            Tags                       = @('graph', 'visualization')
+            Tags       = @('graph', 'visualization')
 
             # A URL to the license for this module.
-            LicenseUri                 = 'https://github.com/KevinMarquette/PSGraphPlus/blob/master/LICENSE'
+            LicenseUri = 'https://github.com/KevinMarquette/PSGraphPlus/blob/master/LICENSE'
             
             # A URL to the main website for this project.
-            ProjectUri                 = 'https://github.com/KevinMarquette/PSGraphPlus'
+            ProjectUri = 'https://github.com/KevinMarquette/PSGraphPlus'
 
             # A URL to an icon representing this module.
             # IconUri = ''
@@ -109,7 +109,7 @@
             # ReleaseNotes of this module
             # ReleaseNotes = ''
 
-            ExternalModuleDependencies = @('PSGraph')
+            #ExternalModuleDependencies = @('PSGraph')
 
         } # End of PSData hashtable
 
