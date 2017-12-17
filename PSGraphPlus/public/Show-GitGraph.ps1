@@ -1,9 +1,9 @@
 enum Direction
 {
-    Down
-    Up
-    Right
-    Left
+    BottomToTop
+    TopToBottom
+    RightToLeft
+    LeftToRight
 }
 
 function Show-GitGraph
@@ -30,6 +30,9 @@ function Show-GitGraph
     .PARAMETER Raw
     Output the raw graph without generating the image or showing it. Useful for testing.
 
+    .PARAMETER Direction
+    This sets the direction of the chart.
+
     .EXAMPLE
     Show-GitGraph
 
@@ -54,16 +57,16 @@ function Show-GitGraph
         [switch]
         $Raw,
         [Direction]
-        $Direction = [Direction]::Up
+        $Direction = [Direction]::LeftToRight
     )
 
     begin
     {
         $directionMap = @{
-            [Direction]::Down = 'TB'
-            [Direction]::Up = 'BT'
-            [Direction]::Right = 'LR'
-            [Direction]::Left = 'RL'
+            [Direction]::TopToBottom = 'TB'
+            [Direction]::BottomToTop = 'BT'
+            [Direction]::LeftToRight = 'LR'
+            [Direction]::RightToLeft = 'RL'
         }
     }
     process
@@ -99,7 +102,7 @@ function Show-GitGraph
                 $label = $data[$HASH]
                 if ($ShowCommitMessage)
                 {
-                    $label = '{0}/n{1}' -f $data[$SUBJECT], $data[$HASH]
+                    $label = '{0}\n{1}' -f $data[$SUBJECT], $data[$HASH]
                 }
 
                 Node -Name $data[$HASH] @{

@@ -4,6 +4,7 @@ Show-GitGraph:Depth
 Show-GitGraph:Uri
 Show-GitGraph:ShowCommitMessage
 Show-GitGraph:Raw
+Show-GitGraph:Direction
 Show-GitGraph:Verbose
 Show-GitGraph:vb
 Show-GitGraph:Debug
