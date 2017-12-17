@@ -1,39 +1,50 @@
+enum Direction
+{
+    BottomToTop
+    TopToBottom
+    RightToLeft
+    LeftToRight
+}
+
 function Show-GitGraph
 {
     <#
     .SYNOPSIS
     Gets a graph of the git history
-    
+
     .DESCRIPTION
     This will generate a graph showing the recent histroy of a project with the branches.
-    
+
     .PARAMETER Path
     Local location of the Git repository
-    
+
     .PARAMETER HistoryDepth
     How far back into history to show
-    
+
     .PARAMETER Uri
     Allows the injection of a base URL for github projects
-    
+
     .PARAMETER ShowCommitMessage
     This will show the git commit instead of the hash
-    
+
     .PARAMETER Raw
     Output the raw graph without generating the image or showing it. Useful for testing.
-    
+
+    .PARAMETER Direction
+    This sets the direction of the chart.
+
     .EXAMPLE
-    Show-GitGraph    
-    
+    Show-GitGraph
+
     .EXAMPLE
     Show-GitGraph -HistoryDepth 30
-    
+
 
     .EXAMPLE
     Show-GitGraph -Path c:\workspace\project -ShowCommitMessage
 
     .NOTES
-    
+
     #>
     [CmdletBinding()]
     param(
@@ -44,8 +55,20 @@ function Show-GitGraph
         [switch]
         $ShowCommitMessage,
         [switch]
-        $Raw
+        $Raw,
+        [Direction]
+        $Direction = [Direction]::LeftToRight
     )
+
+    begin
+    {
+        $directionMap = @{
+            [Direction]::TopToBottom = 'TB'
+            [Direction]::BottomToTop = 'BT'
+            [Direction]::LeftToRight = 'LR'
+            [Direction]::RightToLeft = 'RL'
+        }
+    }
     process
     {
         Push-Location $Path
@@ -55,39 +78,62 @@ function Show-GitGraph
         $PARENT = 1
         $SUBJECT = 2
         $branches = git branch -a -v
+        $tagList = git show-ref --abbrev=7 --tags
+        $current = git log -1 --pretty=format:"%h"
 
-        if ($ShowCommitMessage)
+        $tagLookup = @{}
+        foreach ($tag in $tagList)
         {
-            $labelIndex = $SUBJECT
+            $tagHash, $tagName = $tag -split ' '
+
+            if (-not $tagLookup.ContainsKey($tagHash))
+            {
+                $tagLookup[$tagHash] = @()
+            }
+            $tagLookup[$tagHash] += $tagName.replace('refs/tags/', '')
+
         }
-        else 
-        {
-            $labelIndex = $HASH
-        }
-        
-        $graph = graph git  @{ rankdir = 'LR'; label = [regex]::Escape( $PWD) } {
+
+        $graph = graph git  @{ rankdir = $directionMap[$Direction]; label = [regex]::Escape( $PWD) } {
             Node @{shape = 'box'}
             foreach ($line in $git)
             {
                 $data = $line.split('|')
+                $label = $data[$HASH]
+                if ($ShowCommitMessage)
+                {
+                    $label = '{0}\n{1}' -f $data[$SUBJECT], $data[$HASH]
+                }
+
                 Node -Name $data[$HASH] @{
-                    label = $data[$labelIndex]
-                    URL   = "{0}/commit/{1}" -f $Uri, $data[$HASH]
+                    label = $label
+                    URL = "{0}/commit/{1}" -f $Uri, $data[$HASH]
                 }
                 Edge -From $data[$PARENT].split(' ') -To $data[$HASH]
-            } 
-            
+
+                #add tags
+                if ($tagLookup.ContainsKey($data[$HASH]))
+                {
+                    Node $tagLookup[$data[$HASH]] @{fillcolor = 'yellow'; style = 'filled'}
+                    Edge -From $tagLookup[$data[$HASH]] -To $data[$HASH]
+                }
+            }
+
+            # branches
             Node @{shape = 'box'; fillcolor = 'green'; style = 'filled'}
             foreach ($line in $branches)
             {
                 if ($line -match '(?<branch>[\w/-]+)\s+(?<hash>\w+) (.+)')
                 {
-                    Node $Matches.branch 
-                    Edge $Matches.branch -From $Matches.hash
+                    Node $Matches.branch
+                    Edge $Matches.branch -To $Matches.hash
                 }
             }
-        } 
-        
+
+            # current commit
+            Node $current @{fillcolor = 'gray'; style = 'filled'}
+        }
+
         if ($Raw)
         {
             $graph
@@ -95,7 +141,7 @@ function Show-GitGraph
         else
         {
             $graph | Export-PSGraph -ShowGraph
-        }    
+        }
 
         Pop-Location
     }
