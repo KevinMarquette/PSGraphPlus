@@ -1,15 +1,33 @@
 # PSGraphPlus
 
-Utility module that makes use of PSGraph
+This is a utility module that contains a lot of the graphs used when I demo PSGraph.
+
+---
+
+### Commands
+
+* Show-GitGraph
+* Show-NetworkConnectionGraph
+* Show-ProcessConnectionGraph
+* Show-ServiceDependencyGraph
+
+---
+
+### Examples
+
+Comming soon
 
 ---
 
 ### Getting Started
 
-Install from the PSGallery and Import the module
+    # Install GraphViz from the Chocolatey repo
+    Register-PackageSource -Name Chocolatey -ProviderName Chocolatey -Location http://chocolatey.org/api/v2/
+    Find-Package graphviz | Install-Package -ForceBootstrap
 
-    Install-Module PSGraphPlus
-    Import-Module PSGraphPlus
+    # Install from the Powershell Gallery
+    Find-Module PSGraph -Repository PSGallery | Install-Module
+    Find-Module PSGraphPlus -Repository PSGallery | Install-Module
 
 ---
 
