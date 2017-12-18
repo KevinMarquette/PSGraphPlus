@@ -94,6 +94,7 @@ function Show-GitGraph
 
         }
 
+        $commits = @()
         $graph = graph git  @{ rankdir = $directionMap[$Direction]; label = [regex]::Escape( $PWD) } {
             Node @{shape = 'box'}
             foreach ($line in $git)
@@ -103,10 +104,15 @@ function Show-GitGraph
                 if ($ShowCommitMessage)
                 {
                     $label = '{0}\n{1}' -f $data[$SUBJECT], $data[$HASH]
+                    $commitID = 'commit' + $data[$HASH]
+                    Node $commitID @{label = $data[$SUBJECT]; shape = 'plaintext'}
+
+                    Rank $commitID, $data[$HASH]
+                    Edge -From $commitID -To $data[$HASH] @{style = 'dotted'; arrowhead = 'none'}
+                    $commits = @($commitID) + @($commits)
                 }
 
                 Node -Name $data[$HASH] @{
-                    label = $label
                     URL = "{0}/commit/{1}" -f $Uri, $data[$HASH]
                 }
                 Edge -From $data[$PARENT].split(' ') -To $data[$HASH]
@@ -117,6 +123,10 @@ function Show-GitGraph
                     Node $tagLookup[$data[$HASH]] @{fillcolor = 'yellow'; style = 'filled'}
                     Edge -From $tagLookup[$data[$HASH]] -To $data[$HASH]
                 }
+            }
+            if ($commits.Count)
+            {
+                Edge $commits @{style = 'invis'}
             }
 
             # branches
