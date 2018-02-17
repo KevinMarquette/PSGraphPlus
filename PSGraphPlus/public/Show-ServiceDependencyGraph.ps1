@@ -72,7 +72,7 @@ function Show-ServiceDependencyGraph
         if ( $null -eq $services ) { return }
 
         Set-NodeFormatScript {$_.tolower()}
-        $graph = graph services  @{rankdir = 'LR'} {
+        $graph = graph services  @{rankdir = 'LR'; pack = 'true'} {
             Node @{shape = 'box'}        
             
             Node $services -NodeScript {$_.name} @{

@@ -95,7 +95,7 @@ function Show-GitGraph
         }
 
         $commits = @()
-        $graph = graph git  @{ rankdir = $directionMap[$Direction]; label = [regex]::Escape( $PWD) } {
+        $graph = graph git  @{ rankdir = $directionMap[$Direction]; label = [regex]::Escape( $PWD); pack = 'true' } {
             Node @{shape = 'box'}
             foreach ($line in $git)
             {
