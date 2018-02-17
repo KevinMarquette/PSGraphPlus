@@ -34,7 +34,7 @@ function Show-GitGraph
     This sets the direction of the chart.
 
     .EXAMPLE
-    Show-GitGraph
+    Show-GitGraph -raw
 
     .EXAMPLE
     Show-GitGraph -HistoryDepth 30
@@ -79,7 +79,9 @@ function Show-GitGraph
         $SUBJECT = 2
         $branches = git branch -a -v
         $tagList = git show-ref --abbrev=7 --tags
-        $current = git log -1 --pretty=format:"%h"
+        #$current = git log -1 --pretty=format:"%h"
+
+        $commit = @{}
 
         $tagLookup = @{}
         foreach ($tag in $tagList)
@@ -91,7 +93,6 @@ function Show-GitGraph
                 $tagLookup[$tagHash] = @()
             }
             $tagLookup[$tagHash] += $tagName.replace('refs/tags/', '')
-
         }
 
         $commits = @()
@@ -112,16 +113,18 @@ function Show-GitGraph
                     $commits = @($commitID) + @($commits)
                 }
 
-                Node -Name $data[$HASH] @{
-                    URL = "{0}/commit/{1}" -f $Uri, $data[$HASH]
-                }
+                $commit[$data[$HASH]] = @()
+                # Node -Name $data[$HASH] @{
+                #     URL = "{0}/commit/{1}" -f $Uri, $data[$HASH]
+                # }
                 Edge -From $data[$PARENT].split(' ') -To $data[$HASH]
 
                 #add tags
                 if ($tagLookup.ContainsKey($data[$HASH]))
                 {
-                    Node $tagLookup[$data[$HASH]] @{fillcolor = 'yellow'; style = 'filled'}
-                    Edge -From $tagLookup[$data[$HASH]] -To $data[$HASH]
+                    $commit[$data[$HASH]] += $tagLookup[$data[$HASH]]
+                    #Node $tagLookup[$data[$HASH]] @{fillcolor = 'yellow'; style = 'filled'}
+                    #Edge -From $tagLookup[$data[$HASH]] -To $data[$HASH]
                 }
             }
             if ($commits.Count)
@@ -135,13 +138,26 @@ function Show-GitGraph
             {
                 if ($line -match '(?<branch>[\w/-]+)\s+(?<hash>\w+) (.+)')
                 {
-                    Node $Matches.branch
-                    Edge $Matches.branch -To $Matches.hash
+                    $commit[$Matches.hash] += $Matches.branch
+                    #Node $Matches.branch
+                    #Edge $Matches.branch -To $Matches.hash
                 }
             }
 
             # current commit
-            Node $current @{fillcolor = 'gray'; style = 'filled'}
+            #Node $current @{fillcolor = 'gray'; style = 'filled'}
+
+            foreach ($node in $commit.GetEnumerator())
+            {
+                if ($null -ne $node.Value)
+                {
+                    Record -Name $node.Name -Row $node.Value
+                }
+                else
+                {
+                    Record -Name $node.Name
+                }
+            }
         }
 
         if ($Raw)
