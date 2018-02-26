@@ -12,7 +12,7 @@
     RootModule        = 'PSGraphPlus.psm1'
 
     # Version number of this module.
-    ModuleVersion     = '0.2.7'
+    ModuleVersion     = '1.0.2'
 
     # Supported PSEditions
     # CompatiblePSEditions = @()
@@ -51,7 +51,10 @@
     # ProcessorArchitecture = ''
 
     # Modules that must be imported into the global environment prior to importing this module
-    RequiredModules   = @(@{ModuleName = 'PSGraph'; ModuleVersion = '1.2.6'})
+    RequiredModules   = @(
+        @{ModuleName = 'PSGraph'; ModuleVersion = '2.1.19'}
+        @{ModuleName = 'Select-Ast'; ModuleVersion = '0.1.0'}
+    )
 
     # Assemblies that must be loaded prior to importing this module
     # RequiredAssemblies = @()
@@ -69,7 +72,7 @@
     #NestedModules     = @(@{ModuleName = 'PSGraph'; ModuleVersion = '1.2.6'})
 
     # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
-    FunctionsToExport = @('Show-GitGraph','Show-NetworkConnectionGraph','Show-ProcessConnectionGraph','Show-ServiceDependencyGraph')
+    FunctionsToExport = @('Show-AstCommandGraph', 'Show-GitGraph', 'Show-NetworkConnectionGraph', 'Show-ProcessConnectionGraph', 'Show-ServiceDependencyGraph')
 
     # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
     CmdletsToExport   = @()
@@ -95,19 +98,23 @@
         PSData = @{
 
             # Tags applied to this module. These help with module discovery in online galleries.
-            Tags       = @('graph', 'visualization')
+            Tags         = @('graph', 'visualization')
 
             # A URL to the license for this module.
-            LicenseUri = 'https://github.com/KevinMarquette/PSGraphPlus/blob/master/LICENSE'
+            LicenseUri   = 'https://github.com/KevinMarquette/PSGraphPlus/blob/master/LICENSE'
             
             # A URL to the main website for this project.
-            ProjectUri = 'https://github.com/KevinMarquette/PSGraphPlus'
+            ProjectUri   = 'https://github.com/KevinMarquette/PSGraphPlus'
 
             # A URL to an icon representing this module.
             # IconUri = ''
 
             # ReleaseNotes of this module
-            # ReleaseNotes = ''
+            ReleaseNotes = @'
+1.0.2 20180226
+add Show-AstCommandGraph command
+add Select-Ast as required module
+'@
 
             #ExternalModuleDependencies = @('PSGraph')
 
