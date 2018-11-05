@@ -3,13 +3,13 @@ function Show-ServiceDependencyGraph
     <#
     .SYNOPSIS
     Show the process dependency graph
-    
+
     .DESCRIPTION
     Loads all processes and maps out the dependencies
-    
+
     .EXAMPLE
     Show-ProcessDependencyGraph
-    
+
     .NOTES
     General notes
     #>
@@ -24,7 +24,7 @@ function Show-ServiceDependencyGraph
         [Parameter()]
         [string[]]
         $ComputerName,
- 
+
         # Credential for authorization
         [Parameter()]
         [pscredential]
@@ -43,12 +43,12 @@ function Show-ServiceDependencyGraph
             $PSBoundParameters.Remove('Raw')
             $services = Invoke-Command @PSBoundParameters -ScriptBlock {Get-Service -Include *}
         }
-        else 
+        else
         {
             $services = Get-Service -Include *
         }
-        
-        if ($null -ne $Name) 
+
+        if ($null -ne $Name)
         {
             Write-Verbose ( 'Filtering on name [{0}]' -f ( $Name -join ',' ) )
             $services = foreach ($node in $services)
@@ -73,17 +73,17 @@ function Show-ServiceDependencyGraph
 
         Set-NodeFormatScript {$_.tolower()}
         $graph = graph services  @{rankdir = 'LR'; pack = 'true'} {
-            Node @{shape = 'box'}        
-            
+            Node @{shape = 'box'}
+
             Node $services -NodeScript {$_.name} @{
                 label = {'{0}\n{1}' -f $_.DisplayName, $_.Name}
                 color = {If ($_.Status -eq 'Running') {'blue'}else {'red'}}
             }
             $linkedServices = $services | Where-Object {$_.ServicesDependedOn}
-            Edge $linkedServices -FromScript {$_.Name} -ToScript {$_.ServicesDependedOn.Name}            
-        } 
-        Set-NodeFormatScript 
-        
+            Edge $linkedServices -FromScript {$_.Name} -ToScript {$_.ServicesDependedOn.Name}
+        }
+        Set-NodeFormatScript
+
         if ($Raw)
         {
             $graph
@@ -91,6 +91,6 @@ function Show-ServiceDependencyGraph
         else
         {
             $graph | Export-PSGraph -ShowGraph
-        }      
+        }
     }
 }

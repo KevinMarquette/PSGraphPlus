@@ -100,10 +100,10 @@ function Show-GitGraph
             foreach ($line in $git)
             {
                 $data = $line.split('|')
-                $label = $data[$HASH]
+                #$label = $data[$HASH]
                 if ($ShowCommitMessage)
                 {
-                    $label = '{0}\n{1}' -f $data[$SUBJECT], $data[$HASH]
+                    #$label = '{0}\n{1}' -f $data[$SUBJECT], $data[$HASH]
                     $commitID = 'commit' + $data[$HASH]
                     Node $commitID @{label = $data[$SUBJECT]; shape = 'plaintext'}
 

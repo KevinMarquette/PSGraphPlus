@@ -3,18 +3,18 @@ function Show-NetworkConnectionGraph
     <#
     .SYNOPSIS
     Generates a map of network connections
-    
+
     .Description
     This graph will show the source and target IP addresses with each edge showing the ports
 
     .EXAMPLE
     Show-NetworkConnectionGraph
-    
+
     .Example
     Show-NetworkConnectionGraph -ComputerName $server -Credential $Credential
 
     .NOTES
-    
+
     #>
     [CmdletBinding( DefaultParameterSetName = 'Default' )]
     param(
@@ -53,7 +53,7 @@ function Show-NetworkConnectionGraph
         $netstat = Get-NetTCPConnection -State Established, TimeWait -ErrorAction SilentlyContinue @session
         $netstat = $netstat | Where-Object LocalAddress -NotMatch ':'
         $dns = Get-DnsClientCache @session | Where-Object data -in $netstat.RemoteAddress
-        
+
         $graph = graph network @{rankdir = 'LR'; label = 'Network Connections'} {
             Node @{shape = 'rect'}
 
@@ -67,7 +67,7 @@ function Show-NetworkConnectionGraph
 
             Node $dns -NodeScript {$_.data} @{label = {'{0}\n{1}' -f $_.entry, $_.data}}
 
-        } 
+        }
 
         if ($Raw)
         {
@@ -76,6 +76,6 @@ function Show-NetworkConnectionGraph
         else
         {
             $graph | Export-PSGraph -ShowGraph
-        }        
+        }
     }
 }
