@@ -1,4 +1,4 @@
-Describe 'Function Show-AstGraph' {
+Describe 'Function Show-AstGraph' -Tag Build {
 
     Context 'Annotations' {
         BeforeEach {

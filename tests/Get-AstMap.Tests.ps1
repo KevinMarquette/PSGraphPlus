@@ -1,5 +1,5 @@
 InModuleScope -ModuleName PSGraphPlus {
-    Describe 'Function Get-AstMap' {
+    Describe 'Function Get-AstMap' -Tag Build {
         It 'Should not throw on null AST' {
             Get-AstMap -Ast $null
         }

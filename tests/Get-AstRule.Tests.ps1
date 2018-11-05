@@ -1,5 +1,5 @@
-InModuleScope -ModuleName PSGraphPlus -Tag Build {
-    Describe 'Function Get-AstRule' {
+InModuleScope -ModuleName PSGraphPlus {
+    Describe 'Function Get-AstRule' -Tag Build {
         It 'Return a known rule' {
             $rule = Get-AstRule -Name AssignmentStatementAst
             $rule | Should -Not -BeNullOrEmpty

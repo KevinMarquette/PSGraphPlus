@@ -1,5 +1,5 @@
-InModuleScope -ModuleName PSGraphPlus -Tag Build {
-    Describe 'Function Add-DebugNote' {
+InModuleScope -ModuleName PSGraphPlus {
+    Describe 'Function Add-DebugNote' -Tag Build {
         AfterAll {
             $script:DebugAST = $false
         }
