@@ -3,6 +3,7 @@ InModuleScope -ModuleName PSGraphPlus -Tag Build {
         AfterAll {
             $script:DebugAST = $false
         }
+
         It 'Should create a node and an edge in AST debug mode' {
             $script:DebugAST = $true
             $dot = Add-DebugNote -ID PARENT_ID -Message DEBUG_MESSAGE
@@ -12,13 +13,15 @@ InModuleScope -ModuleName PSGraphPlus -Tag Build {
             $dot[1] | Should -Match '->' -Because "the 2nd item should be an edge"
             $dot[1] | Should -Match 'PARENT_ID' -Because 'The edge should be to the Parent ID'
         }
-    
+
         It 'Does nothing when not in AST debug mode' {
             $script:DebugAST = $false
             $dot = Add-DebugNote -ID PARENT_ID -Message DEBUG_MESSAGE
-            $dot | Should -BeNullOrEmpty            
+            $dot | Should -BeNullOrEmpty
         }
+
         Context 'Annotations' {
+
             BeforeEach {
                 $script = {$VARIABLE_NAME}
             }
@@ -27,16 +30,15 @@ InModuleScope -ModuleName PSGraphPlus -Tag Build {
                 $graph = Show-AstGraph -ScriptBlock $Script -Raw -Annotate
                 $graph | Out-String | Should -Match 'VARIABLE_NAME' -Because 'This is in the scriptblock'
                 $graph | Out-String | Should -Match ';style="dotted"' -Because 'Only annotations use the dotted style'
-                $graph | Out-String | Should -Match 'VariableExpressionAst' 
+                $graph | Out-String | Should -Match 'VariableExpressionAst'
             }
 
             It "Show-AstGraph should not create debug annotations " {
-                $graph = Show-AstGraph -ScriptBlock $Script -Raw 
+                $graph = Show-AstGraph -ScriptBlock $Script -Raw
                 $graph | Out-String | Should -Match 'VARIABLE_NAME' -Because 'This is in the scriptblock'
                 $graph | Out-String | Should -Not -Match ';style="dotted"' -Because 'Only annotations use the dotted style'
-                $graph | Out-String | Should -Not -Match 'VariableExpressionAst' 
+                $graph | Out-String | Should -Not -Match 'VariableExpressionAst'
             }
         }
     }
-    
 }

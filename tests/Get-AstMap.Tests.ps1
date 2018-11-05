@@ -3,7 +3,7 @@ InModuleScope -ModuleName PSGraphPlus {
         It 'Should not throw on null AST' {
             Get-AstMap -Ast $null
         }
-    
+
         $testCases = @(
             @{
                 Script   = {$a}
@@ -28,5 +28,4 @@ InModuleScope -ModuleName PSGraphPlus {
             }
         }
     }
-    
 }
