@@ -3,18 +3,18 @@ function Show-ProcessConnectionGraph
     <#
     .SYNOPSIS
     Generates a map of network connections
-    
+
     .Description
     This graph will show the source and target IP addresses with each edge showing the ports
 
     .EXAMPLE
     Show-NetworkConnectionGraph
-    
+
     .Example
     Show-NetworkConnectionGraph -ComputerName $server -Credential $Credential
 
     .NOTES
-    
+
     #>
     [CmdletBinding( DefaultParameterSetName = 'Default' )]
     param(
@@ -47,7 +47,7 @@ function Show-ProcessConnectionGraph
         $netstat = Get-NetTCPConnection -State Established, TimeWait -ErrorAction SilentlyContinue @session
         $netstat = $netstat | Where-Object LocalAddress -NotMatch ':'
         $dns = Get-DnsClientCache @session | Where-Object data -in $netstat.RemoteAddress
-        
+
         $process = Get-CIMInstance -ClassName CIM_Process @session | Where-Object ProcessId -in $netstat.OwningProcess
 
         $graph = graph network @{rankdir = 'LR'; label = 'Process Network Connections'} {
@@ -63,7 +63,7 @@ function Show-ProcessConnectionGraph
             Edge @EdgeParam
 
             Node $dns -NodeScript {$_.data} @{label = {'{0}\n{1}' -f $_.entry, $_.data}}
-        } 
+        }
 
         if ($Raw)
         {
@@ -72,6 +72,6 @@ function Show-ProcessConnectionGraph
         else
         {
             $graph | Export-PSGraph -ShowGraph
-        }        
+        }
     }
 }
