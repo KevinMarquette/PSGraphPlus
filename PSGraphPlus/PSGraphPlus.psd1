@@ -51,10 +51,7 @@
     # ProcessorArchitecture = ''
 
     # Modules that must be imported into the global environment prior to importing this module
-    RequiredModules   = @(
-        @{ModuleName = 'PSGraph'; ModuleVersion = '2.1.19'}
-        @{ModuleName = 'Select-Ast'; ModuleVersion = '0.1.0'}
-    )
+    RequiredModules   = @('PSGraph', 'Select-Ast')
 
     # Assemblies that must be loaded prior to importing this module
     # RequiredAssemblies = @()
