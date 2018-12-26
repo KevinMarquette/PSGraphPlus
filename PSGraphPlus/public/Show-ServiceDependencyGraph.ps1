@@ -8,7 +8,7 @@ function Show-ServiceDependencyGraph
     Loads all processes and maps out the dependencies
 
     .EXAMPLE
-    Show-ProcessDependencyGraph
+    Show-ServiceDependencyGraph
 
     .NOTES
     General notes
