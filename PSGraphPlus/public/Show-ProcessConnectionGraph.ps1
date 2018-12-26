@@ -8,10 +8,10 @@ function Show-ProcessConnectionGraph
     This graph will show the source and target IP addresses with each edge showing the ports
 
     .EXAMPLE
-    Show-NetworkConnectionGraph
+    Show-ProcessConnectionGraph
 
     .Example
-    Show-NetworkConnectionGraph -ComputerName $server -Credential $Credential
+    Show-ProcessConnectionGraph -ComputerName $server -Credential $Credential
 
     .NOTES
 
